@@ -32,8 +32,11 @@ if selected_role == "Add New Role":
         if new_role not in data:
             data[new_role] = {"criteria": [], "candidates": []}
             save_data(data)
-            st.experimental_set_query_params(role=new_role)  # Redirect to the new role
-            st.experimental_rerun()
+            
+            # Update query parameters to reflect the new role
+            st.query_params["role"] = new_role
+            st.rerun()  # Refresh the app to load the new role
+
 else:
     # Main App for Selected Role
     st.title(f"Role: {selected_role}")
@@ -45,7 +48,7 @@ else:
         if criteria_input and criteria_input not in data[selected_role]["criteria"]:
             data[selected_role]["criteria"].append(criteria_input)
             save_data(data)
-            st.experimental_rerun()
+            st.rerun()  # Refresh the app to update the criteria list
 
     # Display existing criteria
     if data[selected_role]["criteria"]:
@@ -60,7 +63,7 @@ else:
         if candidate_input and candidate_input not in data[selected_role]["candidates"]:
             data[selected_role]["candidates"].append(candidate_input)
             save_data(data)
-            st.experimental_rerun()
+            st.rerun()  # Refresh the app to update the candidate list
 
     # Display existing candidates
     if data[selected_role]["candidates"]:
