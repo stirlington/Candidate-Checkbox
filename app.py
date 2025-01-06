@@ -3,75 +3,92 @@ import pandas as pd
 import pickle
 import os
 
-# Function to save data persistently
+# --- Helper Functions ---
+# Save data to a file
 def save_data(data, filename="data.pkl"):
     with open(filename, "wb") as f:
         pickle.dump(data, f)
 
-# Function to load data from persistent storage
+# Load data from a file
 def load_data(filename="data.pkl"):
     if os.path.exists(filename):
         with open(filename, "rb") as f:
             return pickle.load(f)
     return {}
 
-# Load saved data
+# Initialize data storage
 data = load_data()
 
-# Sidebar: Select or Add a Role
-st.sidebar.title("Vacancies")
+# --- Sidebar: Role Selection ---
+st.sidebar.title("Job Roles")
 roles = list(data.keys())
 selected_role = st.sidebar.selectbox("Select a Role", ["Add New Role"] + roles)
 
 if selected_role == "Add New Role":
-    # Add new role functionality
+    # Add a new role
+    st.sidebar.subheader("Add a New Role")
     new_role = st.sidebar.text_input("Enter Role Name")
-    if st.sidebar.button("Add Role") and new_role:
+    if st.sidebar.button("Create Role") and new_role:
         if new_role not in data:
             data[new_role] = {"criteria": [], "candidates": []}
             save_data(data)
-            st.rerun()  # Corrected: Use st.rerun() to refresh the app
-
+            st.experimental_set_query_params(role=new_role)  # Redirect to the new role
+            st.experimental_rerun()
 else:
     # Main App for Selected Role
     st.title(f"Role: {selected_role}")
-    
-    # Add Criteria Section
+
+    # --- Add Criteria Section ---
     st.subheader("Job Qualification Criteria")
-    criteria_input = st.text_input("Add a new criterion")
-    if st.button("Add Criterion") and criteria_input:
-        if criteria_input not in data[selected_role]["criteria"]:
+    criteria_input = st.text_input("Add a New Criterion", key="criteria_input")
+    if st.button("Add Criterion"):
+        if criteria_input and criteria_input not in data[selected_role]["criteria"]:
             data[selected_role]["criteria"].append(criteria_input)
             save_data(data)
-            st.rerun()  # Corrected: Use st.rerun() to refresh the app
+            st.experimental_rerun()
 
-    # Add Candidates Section
+    # Display existing criteria
+    if data[selected_role]["criteria"]:
+        st.write("### Current Criteria:")
+        for criterion in data[selected_role]["criteria"]:
+            st.write(f"- {criterion}")
+
+    # --- Add Candidates Section ---
     st.subheader("Candidates")
-    candidate_input = st.text_input("Add a new candidate")
-    if st.button("Add Candidate") and candidate_input:
-        if candidate_input not in data[selected_role]["candidates"]:
+    candidate_input = st.text_input("Add a New Candidate", key="candidate_input")
+    if st.button("Add Candidate"):
+        if candidate_input and candidate_input not in data[selected_role]["candidates"]:
             data[selected_role]["candidates"].append(candidate_input)
             save_data(data)
-            st.rerun()  # Corrected: Use st.rerun() to refresh the app
+            st.experimental_rerun()
 
-    # Display Criteria and Candidates Table with Checkboxes
+    # Display existing candidates
+    if data[selected_role]["candidates"]:
+        st.write("### Current Candidates:")
+        for candidate in data[selected_role]["candidates"]:
+            st.write(f"- {candidate}")
+
+    # --- Comparison Table ---
     if data[selected_role]["criteria"] and data[selected_role]["candidates"]:
         st.subheader("Comparison Table")
 
-        # Create a DataFrame for checkboxes
+        # Create a DataFrame for the table
         criteria = data[selected_role]["criteria"]
         candidates = data[selected_role]["candidates"]
         table_data = {
             criterion: [
-                st.checkbox("", key=f"{selected_role}_{criterion}_{candidate}")
+                st.checkbox(
+                    f"{criterion} - {candidate}",
+                    key=f"{selected_role}_{criterion}_{candidate}",
+                )
                 for candidate in candidates
             ]
             for criterion in criteria
         }
 
-        # Convert to DataFrame for display (optional)
+        # Optional: Convert to DataFrame (for display or further logic)
         df = pd.DataFrame(table_data, index=candidates).T
         st.dataframe(df)
 
-# Save updated data on exit
+# Save updated data at the end of execution
 save_data(data)
