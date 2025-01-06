@@ -30,7 +30,7 @@ if selected_role == "Add New Role":
         if new_role not in data:
             data[new_role] = {"criteria": [], "candidates": []}
             save_data(data)
-            st.rerun()  # Updated to use st.rerun()
+            st.rerun()  # Corrected: Use st.rerun() to refresh the app
 
 else:
     # Main App for Selected Role
@@ -43,7 +43,7 @@ else:
         if criteria_input not in data[selected_role]["criteria"]:
             data[selected_role]["criteria"].append(criteria_input)
             save_data(data)
-            st.rerun()  # Updated to use st.rerun()
+            st.rerun()  # Corrected: Use st.rerun() to refresh the app
 
     # Add Candidates Section
     st.subheader("Candidates")
@@ -52,7 +52,7 @@ else:
         if candidate_input not in data[selected_role]["candidates"]:
             data[selected_role]["candidates"].append(candidate_input)
             save_data(data)
-            st.rerun()  # Updated to use st.rerun()
+            st.rerun()  # Corrected: Use st.rerun() to refresh the app
 
     # Display Criteria and Candidates Table with Checkboxes
     if data[selected_role]["criteria"] and data[selected_role]["candidates"]:
